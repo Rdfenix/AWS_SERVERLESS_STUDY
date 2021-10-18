@@ -18,12 +18,26 @@ service: node-s3-thumbnail
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
-frameworkVersion: '2'
+frameworkVersion: "2"
 
 provider:
   name: aws
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
+  profile: 'IAM USER'
+  region: us-east-2
+  timeout: 10
+  memorySize: 128
+  stage: ${opt:stage,'dev'}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource: "*"
+  environment:
+    SOURCE_BUCKET: 'bucket when you will be upload of your images'
+    SIZES: 200
+    DESTINATION_BUCKET: 'destination when you image has been do thumbnail'
 
 # you can overwrite defaults here
 #  stage: dev
@@ -58,8 +72,14 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  thumbGenerator:
+    handler: handler.thumbGenerator
+    events:
+      - s3:
+          bucket: 'SOURCE_BUCKET'
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .png
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -111,3 +131,9 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+resources:
+  Resources:
+    DestImageBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: 'DESTINATION_BUCKET'
