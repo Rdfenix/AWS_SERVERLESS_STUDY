@@ -33,17 +33,6 @@ module.exports.create = (event, context, callback) => {
     },
   };
 
-  //   const params = {
-  //     TableName: process.env.DYNAMODB_TABLE,
-  //     Item: {
-  //       id: uuid.v1(),
-  //       text: data.text,
-  //       checked: false,
-  //       createdAt: timestamp,
-  //       updatedAt: timestamp,
-  //     },
-  //   };
-
   // write the todo to the database
   dynamoDb.put(paramsData, (error) => {
     // handle potential errors
@@ -67,13 +56,6 @@ module.exports.create = (event, context, callback) => {
 };
 
 module.exports.delete = (event, context, callback) => {
-  // const params = {
-  //   TableName: process.env.DYNAMODB_TABLE,
-  //   Key: {
-  //     id: event.pathParameters.id,
-  //   },
-  // };
-
   let paramsData = {
     ...params,
     Key: {
@@ -104,13 +86,6 @@ module.exports.delete = (event, context, callback) => {
 };
 
 module.exports.get = (event, context, callback) => {
-  //   const params = {
-  //     TableName: process.env.DYNAMODB_TABLE,
-  //     Key: {
-  //       id: event.pathParameters.id,
-  //     },
-  //   };
-
   let paramsData = {
     ...params,
     Key: {
@@ -177,24 +152,6 @@ module.exports.update = (event, context, callback) => {
     });
     return;
   }
-
-  //   const params = {
-  //     TableName: process.env.DYNAMODB_TABLE,
-  //     Key: {
-  //       id: event.pathParameters.id,
-  //     },
-  //     ExpressionAttributeNames: {
-  //       "#todo_text": "text",
-  //     },
-  //     ExpressionAttributeValues: {
-  //       ":text": data.text,
-  //       ":checked": data.checked,
-  //       ":updatedAt": timestamp,
-  //     },
-  //     UpdateExpression:
-  //       "SET #todo_text = :text, checked = :checked, updatedAt = :updatedAt",
-  //     ReturnValues: "ALL_NEW",
-  //   };
 
   let paramsData = {
     ...params,
