@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: node-s3-thumbnail
+service: api-rest-with-dynamodb
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -23,21 +23,19 @@ frameworkVersion: "2"
 provider:
   name: aws
   runtime: nodejs12.x
-  lambdaHashingVersion: 20201221
-  profile: serverless-admin
-  region: us-east-2
-  timeout: 10
-  memorySize: 128
-  stage: ${opt:stage,'dev'}
-  iamRoleStatements:
-    - Effect: "Allow"
-      Action:
-        - "s3:*"
-      Resource: "*"
   environment:
-    SOURCE_BUCKET: rud-s3-thumbnail-generator-test
-    SIZES: 200
-    DESTINATION_BUCKET: rud-s3-target-thumbnail
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  lambdaHashingVersion: 20201221
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 # you can overwrite defaults here
 #  stage: dev
@@ -72,14 +70,8 @@ provider:
 #    - include-me-dir/**
 
 functions:
-  thumbGenerator:
-    handler: handler.thumbGenerator
-    events:
-      - s3:
-          bucket: rud-s3-thumbnail-generator-test
-          event: s3:ObjectCreated:*
-          rules:
-            - suffix: .png
+  hello:
+    handler: handler.hello
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -133,7 +125,19 @@ functions:
 #       Value: "Some output value"
 resources:
   Resources:
-    DestImageBucket:
-      Type: AWS::S3::Bucket
+    TodosDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
       Properties:
-        BucketName: rud-s3-target-thumbnail
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
