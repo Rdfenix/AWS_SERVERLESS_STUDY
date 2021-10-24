@@ -26,7 +26,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-2
-  profile: "IAM PROFILE"
+  profile: 'ROLE IAM'
   stage: dev
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
